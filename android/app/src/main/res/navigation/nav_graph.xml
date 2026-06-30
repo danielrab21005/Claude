@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/dashboardFragment">
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.nrs.tapforward.ui.dashboard.DashboardFragment"
+        android:label="Dashboard" />
+
+    <fragment
+        android:id="@+id/donationsFragment"
+        android:name="com.nrs.tapforward.ui.donations.DonationsFragment"
+        android:label="Donations">
+        <action
+            android:id="@+id/action_donationsFragment_to_newDonationFragment"
+            app:destination="@id/newDonationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/newDonationFragment"
+        android:name="com.nrs.tapforward.ui.donations.NewDonationFragment"
+        android:label="Record Donation" />
+
+    <fragment
+        android:id="@+id/eventsFragment"
+        android:name="com.nrs.tapforward.ui.events.EventsFragment"
+        android:label="Events">
+        <action
+            android:id="@+id/action_eventsFragment_to_newEventFragment"
+            app:destination="@id/newEventFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/newEventFragment"
+        android:name="com.nrs.tapforward.ui.events.NewEventFragment"
+        android:label="New Event" />
+
+    <fragment
+        android:id="@+id/membersFragment"
+        android:name="com.nrs.tapforward.ui.members.MembersFragment"
+        android:label="Members" />
+
+</navigation>

@@ -1,0 +1,2 @@
+-keep class com.nrs.tapforward.data.model.** { *; }
+-keepclassmembers class * extends androidx.room.RoomDatabase { *; }
