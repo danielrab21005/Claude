@@ -295,43 +295,30 @@ const UCL_RAW=[
 ];
 const UCL_FROM_EPL=["ARS","MCI","LIV","MUN","AVL"];
 const ATTRS=[["STR","Striking",.16],["POW","Power",.12],["WRS","Wrestling",.15],["GRP","Grappling",.13],["CAR","Cardio",.12],["CHN","Chin",.10],["SPD","Speed",.10],["IQ","Fight IQ",.12]];
-const UFC_RAW=[
-["Islam Makhachev","Welterweight champion","88,78,95,94,93,88,82,96"],
-["Alexander Volkanovski","Featherweight champion","92,80,84,82,95,88,86,96"],
-["Justin Gaethje","Lightweight champion","90,95,82,72,85,88,80,86"],
-["Petr Yan","Bantamweight champion","93,84,82,80,92,92,85,91"],
-["Joshua Van","Flyweight champion","90,82,80,80,94,90,92,86"],
-["Sean Strickland","Middleweight champion","89,76,80,78,96,90,82,88"],
-["Ciryl Gane","Heavyweight champion","92,86,76,76,88,86,94,90"],
-["Carlos Ulberg","Light Heavyweight champion","90,90,76,74,85,86,90,86"],
-["Ilia Topuria","Lightweight","94,96,84,88,86,88,88,92"],
-["Tom Aspinall","Heavyweight","92,92,84,90,82,85,96,90"],
-["Merab Dvalishvili","Bantamweight","82,70,97,85,99,92,90,90"],
-["Alex Pereira","Light Heavyweight","92,99,72,70,80,86,84,88"],
-["Khamzat Chimaev","Middleweight","84,88,98,92,78,86,85,86"],
-["Dricus du Plessis","Middleweight","84,85,86,84,92,92,78,87"],
-["Magomed Ankalaev","Light Heavyweight","86,85,84,80,86,90,80,88"],
-["Arman Tsarukyan","Lightweight","86,82,92,86,90,86,86,88"],
-["Jack Della Maddalena","Welterweight","91,85,78,80,88,86,86,88"],
-["Belal Muhammad","Welterweight","82,70,90,82,95,88,78,90"],
-["Shavkat Rakhmonov","Welterweight","86,85,88,90,88,88,80,88"],
-["Ian Machado Garry","Welterweight","89,80,80,80,88,85,88,88"],
-["Charles Oliveira","Lightweight","85,82,78,98,84,74,82,86"],
-["Max Holloway","Lightweight","96,85,74,80,99,97,86,94"],
-["Movsar Evloev","Featherweight","84,74,94,86,94,88,82,90"],
-["Diego Lopes","Featherweight","88,88,76,88,85,86,86,84"],
-["Umar Nurmagomedov","Bantamweight","88,78,94,88,92,88,88,90"],
-["Sean O'Malley","Bantamweight","92,88,65,72,82,80,93,86"],
-["Alexandre Pantoja","Flyweight","84,78,86,92,90,88,88,88"],
-["Jiří Procházka","Light Heavyweight","90,93,72,76,82,80,88,82"]
+/* Men's divisions in ranking order: champion first, then No. 1-15 (rankings as of October 2026). Attributes: STR,POW,WRS,GRP,CAR,CHN,SPD,IQ */
+const UFC_DIVS=[
+["Heavyweight","Ciryl Gane|92,86,76,76,88,86,94,90;Tom Aspinall|92,92,84,90,82,85,96,90;Alexander Volkov|89,86,70,72,84,84,82,86;Sergei Pavlovich|84,96,68,64,72,84,84,76;Josh Hokit|80,88,86,72,80,86,78,76;Curtis Blaydes|76,86,92,74,80,78,78,80;Waldo Cortes-Acosta|82,88,66,64,82,86,78,76;Rizvan Kuniev|78,80,88,80,82,82,76,78;Vitor Petrino|78,88,82,78,74,78,78,74;Serghei Spivac|74,78,86,84,78,78,72,78;Ante Delija|80,88,70,68,76,82,74,76;Valter Walker|72,80,78,88,72,78,72,74;Tyrell Fortune|74,84,86,70,74,78,76,72;Derrick Lewis|74,99,60,60,66,84,72,72;Mario Pinto|80,90,72,70,76,80,76,74;Aleksandar Rakić|84,86,74,72,78,78,78,82"],
+["Light Heavyweight","Carlos Ulberg|90,90,76,74,85,86,90,86;Magomed Ankalaev|86,85,84,80,86,90,80,88;Jiří Procházka|90,93,72,76,82,80,88,82;Alex Pereira|92,99,72,70,80,86,84,88;Khalil Rountree Jr.|86,92,66,64,80,84,82,80;Navajo Stirling|84,84,76,74,84,82,84,80;Paulo Costa|84,90,70,68,72,88,76,76;Azamat Murzakanov|84,90,76,70,74,80,82,78;Dominick Reyes|84,86,70,70,76,74,84,80;Jan Błachowicz|82,88,78,80,78,82,72,86;Bogdan Guskov|82,90,68,66,74,78,80,76;Robert Whittaker|88,84,82,76,86,84,86,90;Alonzo Menifield|76,90,74,68,70,80,76,72;Muhammad Saidov|78,80,84,78,82,80,78,78;Reinier de Ridder|74,74,86,92,84,80,72,84;Nikita Krylov|80,84,76,82,74,72,78,76"],
+["Middleweight","Sean Strickland|89,76,80,78,96,90,82,88;Khamzat Chimaev|84,88,98,92,78,86,85,86;Dricus du Plessis|84,85,86,84,92,92,78,87;Nassourdine Imavov|88,82,80,78,86,84,84,86;Joe Pyfer|82,90,78,78,78,82,80,78;Brendan Allen|80,78,82,90,86,80,78,84;Caio Borralho|84,82,86,84,86,86,80,86;Gregory Rodrigues|82,90,76,78,80,82,78,76;Anthony Hernandez|80,78,86,86,94,84,78,80;Israel Adesanya|95,82,70,72,82,80,90,94;Christian Leroy Duncan|84,82,72,72,82,80,84,78;Ikram Aliskerov|80,84,88,84,78,80,80,80;Bo Nickal|76,82,96,86,80,78,80,78;Abus Magomedov|84,84,78,78,76,78,84,78;Roman Kopylov|86,86,68,66,80,82,80,80;Edmen Shahbazyan|82,84,76,76,76,78,84,78"],
+["Welterweight","Islam Makhachev|88,78,95,94,93,88,82,96;Carlos Prates|90,92,66,70,84,82,86,84;Ian Machado Garry|89,80,80,80,88,85,88,88;Michael Morales|88,90,76,74,86,86,86,84;Jack Della Maddalena|91,85,78,80,88,86,86,88;Sean Brady|78,76,92,92,90,84,78,88;Gabriel Bonfim|82,84,80,90,82,80,84,80;Belal Muhammad|82,70,90,82,95,88,78,90;Joaquin Buckley|84,92,74,70,82,82,86,78;Uroš Medić|82,88,68,70,76,74,82,76;Leon Edwards|88,82,82,80,90,86,82,88;Mike Malott|80,80,80,86,82,78,80,80;Kamaru Usman|86,84,93,82,90,88,78,90;Yaroslav Amosov|78,78,92,90,90,84,76,86;Kevin Holland|86,82,70,82,82,80,86,76;Daniel Rodriguez|84,82,70,70,84,82,78,78"],
+["Lightweight","Justin Gaethje|90,95,82,72,85,88,80,86;Ilia Topuria|94,96,84,88,86,88,88,92;Arman Tsarukyan|86,82,92,86,90,86,86,88;Charles Oliveira|85,82,78,98,84,74,82,86;Max Holloway|96,85,74,80,99,97,86,94;Paddy Pimblett|80,78,78,88,92,86,78,80;Benoît Saint Denis|82,86,84,88,84,80,80,80;Quillan Salkilld|82,84,80,84,84,80,82,80;Mauricio Ruffy|90,90,70,72,82,80,88,84;Salahdine Parnasse|86,80,82,80,88,82,84,84;Mateusz Gamrot|78,76,90,84,94,82,80,84;Rafael Fiziev|88,88,70,68,82,80,86,80;Renato Moicano|82,78,78,88,82,76,80,82;Dan Hooker|84,82,74,78,86,82,80,82;Tom Nolan|82,82,74,78,82,78,84,78;Beneil Dariush|80,80,84,88,84,72,76,84"],
+["Featherweight","Alexander Volkanovski|92,80,84,82,95,88,86,96;Movsar Evloev|84,74,94,86,94,88,82,90;Diego Lopes|88,88,76,88,85,86,86,84;Lerone Murphy|86,84,80,80,90,86,84,86;Aljamain Sterling|82,70,90,90,90,82,84,88;Arnold Allen|86,82,78,78,86,84,84,84;Jean Silva|86,90,70,74,84,84,84,78;Pat Sabatini|74,72,86,90,86,80,76,80;Nathaniel Wood|84,76,74,76,86,80,84,82;Youssef Zalal|80,76,82,86,84,80,82,80;Kevin Vallejos|86,86,70,72,82,80,86,78;Melquizael Costa|84,80,74,82,82,80,84,78;Steve Garcia|84,90,70,72,80,78,84,76;Aaron Pico|82,86,88,76,80,78,82,78;Jamall Emmers|78,78,84,80,84,80,76,78;Jose Delgado|84,86,74,74,82,80,84,78"],
+["Bantamweight","Petr Yan|93,84,82,80,92,92,85,91;Merab Dvalishvili|82,70,97,85,99,92,90,90;Sean O'Malley|92,88,65,72,82,80,93,86;Song Yadong|88,86,76,74,84,88,86,84;Umar Nurmagomedov|88,78,94,88,92,88,88,90;Mario Bautista|82,78,82,88,90,84,82,84;Cory Sandhagen|90,84,76,78,86,82,90,88;Payton Talbott|88,84,70,74,84,80,88,80;Aiemann Zahabi|86,80,76,78,84,82,82,82;David Martinez|84,84,74,74,82,82,84,78;Raul Rosas Jr.|76,76,86,88,82,78,82,78;Marlon Vera|86,82,68,76,84,90,80,82;Deiveson Figueiredo|84,86,74,84,78,80,82,80;Farid Basharat|80,76,86,88,84,80,80,82;Marcus McGhee|84,86,72,72,80,80,82,78;Raoni Barcelos|84,84,76,80,80,78,82,78"],
+["Flyweight","Joshua Van|90,82,80,80,94,90,92,86;Manel Kape|90,86,70,74,82,80,90,82;Alexandre Pantoja|84,78,86,92,90,88,88,88;Brandon Royval|84,80,70,86,88,78,84,80;Tatsuro Taira|80,74,84,90,86,82,82,84;Asu Almabayev|78,74,88,86,86,80,80,82;Lone'er Kavanagh|86,82,74,74,84,82,86,80;Ramazan Temirov|84,84,76,74,82,80,84,78;Kyoji Horiguchi|88,84,80,78,84,78,90,88;Amir Albazi|82,78,80,86,82,80,82,84;Brandon Moreno|86,78,80,84,86,84,84,86;Sumudaerji|84,84,68,70,80,78,84,76;Mitch Raposo|80,74,78,80,86,80,82,78;Imanol Rodriguez|80,76,78,80,82,78,82,76;Rei Tsuruya|74,72,86,88,82,78,80,78;Charles Johnson|82,76,74,76,86,80,84,78"]
 ];
+const UFC_LEGENDS="Jon Jones|90,84,93,90,90,92,84,98;Georges St-Pierre|90,82,96,90,94,88,88,97;Khabib Nurmagomedov|82,76,99,95,97,90,82,95;Anderson Silva|97,90,70,82,82,84,95,92;Demetrious Johnson|90,74,90,92,97,88,96,98;José Aldo|94,88,84,80,86,90,90,90;Daniel Cormier|84,82,96,85,88,90,78,90;Cain Velasquez|86,86,94,82,98,84,82,86;Conor McGregor|92,94,68,70,70,84,92,85;Francis Ngannou|80,99,72,70,72,92,80,80;Stipe Miocic|86,86,88,78,86,86,78,88;BJ Penn|88,80,80,96,72,92,84,86;Dominick Cruz|88,74,86,78,92,82,96,92;Henry Cejudo|82,78,94,80,88,82,86,86;Dustin Poirier|90,88,76,84,88,88,80,90;Chuck Liddell|88,96,82,66,80,88,78,80;Randy Couture|80,80,94,82,88,84,72,92;Matt Hughes|74,82,96,86,88,84,74,84;Royce Gracie|62,60,74,99,84,82,66,90";
 
 /* ---------- build ---------- */
 const buildTeams=raw=>raw.map(([id,name,conf,s])=>({id,name,conf,players:s.split(";").map((x,i)=>{const [n,pos,o]=x.split("|");return {id:id+"_"+i,name:n,pos,ovr:+o,team:name};})}));
 const NFL=buildTeams(NFL_RAW), NBA=buildTeams(NBA_RAW), EPL=buildTeams(EPL_RAW);
 const UCL=[...buildTeams(UCL_RAW),...EPL.filter(t=>UCL_FROM_EPL.includes(t.id))];
 const ufcOvr=a=>Math.round(ATTRS.reduce((t,[k,,w])=>t+a[k]*w,0));
-const FIGHTERS=UFC_RAW.map(([name,div,s],i)=>{const v=s.split(",").map(Number);const a={};ATTRS.forEach(([k],j)=>a[k]=v[j]);return {id:"f"+i,name,div,a,ovr:ufcOvr(a)};});
+const parseF=str=>str.split(";").map((x,i)=>{const [name,v]=x.split("|"),n=v.split(",").map(Number),a={};ATTRS.forEach(([k],j)=>a[k]=n[j]);return {name,rank:i,a,ovr:ufcOvr(a)};});
+const DIVS={};
+UFC_DIVS.forEach(([div,str])=>{DIVS[div]=parseF(str).map(f=>({...f,div,tag:f.rank?div+" · No. "+f.rank:div+" champion"}));});
+DIVS.Legends=parseF(UFC_LEGENDS).sort((a,b)=>b.ovr-a.ovr).map((f,i)=>({...f,rank:i,div:"Legends",tag:"UFC legend"}));
+const FIGHTERS=Object.values(DIVS).flat();FIGHTERS.forEach((f,i)=>f.id="f"+i);
+const DIV_TAG={Heavyweight:"HW","Light Heavyweight":"LHW",Middleweight:"MW",Welterweight:"WW",Lightweight:"LW",Featherweight:"FW",Bantamweight:"BW",Flyweight:"FLW",Legends:"GOAT"};
 
 const mk=(k,acc,w,x,y)=>({k,acc,w:w??1,x,y});
 const NFL_SLOTS=[mk("QB",["QB"],.22),mk("RB",["RB"],.08),mk("WR",["WR"],.10),mk("WR",["WR"],.10),mk("TE",["TE"],.07),mk("OL",["OL"],.12),mk("DL",["DL"],.11),mk("LB",["LB"],.07),mk("CB",["CB"],.07),mk("S",["S"],.06)];
@@ -540,20 +527,21 @@ function fight(U,O,rounds){
   return {won,how};
 }
 function simUFC(user){
-  const pool=[...FIGHTERS].sort((a,b)=>b.ovr-a.ovr);
+  const L=DIVS[user.div],leg=user.div==="Legends",lbl=r=>leg?"No. "+r+" legend":"No. "+r+" "+user.div;
   let rank=15,wins=0,losses=0,champ=false;const path=[],log=[];
-  [12,9,7,5,3].forEach(r=>{const O=pool[r-1],f=fight(user,O,3);
+  [12,9,7,5,3].forEach(r=>{const O=L[r],f=fight(user,O,3);
     if(f.won){wins++;rank=Math.min(rank,r);}else{losses++;rank=Math.min(15,rank+2);}
-    log.push({r:f.won?"W":"L"});path.push({round:"No. "+r+" ranked",opp:O.name,s:f.how,r:f.won?"W":"L"});});
-  const title=losses<=1,O=title?pool[0]:pool[3],f=fight(user,O,title?5:3);
-  if(f.won){wins++;if(title)champ=true;else rank=Math.min(rank,4);}else{losses++;rank=title?2:Math.min(15,rank+2);}
-  log.push({r:f.won?"W":"L"});path.push({round:title?"Title fight · 5 rounds":"No. 4 ranked",opp:O.name,s:f.how,r:f.won?"W":"L"});
-  const others=pool.slice(0,15);const list=champ?[{name:user.name,you:true},...others]:[...others.slice(0,rank),{name:user.name,you:true},...others.slice(rank)].slice(0,16);
-  return {headline:champ?"UFC Champion":"Ranked No. "+rank,tone:champ?"gold":rank<=5?"mid":"bad",eyebrow:wins+"-"+losses+" in the gauntlet",
-    sub:champ?`Took the belt from ${O.name}.`:title?`Fell short in the title fight against ${O.name}.`:"Two losses kept you out of a title shot.",
+    log.push({r:f.won?"W":"L"});path.push({round:lbl(r),opp:O.name,s:f.how,r:f.won?"W":"L"});});
+  const title=losses<=1,O=title?L[0]:L[4],f=fight(user,O,title?5:3);
+  if(f.won){wins++;if(title)champ=true;else rank=Math.min(rank,4);}else{losses++;rank=title?1:Math.min(15,rank+2);}
+  log.push({r:f.won?"W":"L"});path.push({round:title?(leg?"GOAT fight":"Title fight")+" · 5 rounds":lbl(4),opp:O.name,s:f.how,r:f.won?"W":"L"});
+  const others=L.slice(0,16),you={name:user.name,you:true,ovr:user.ovr};
+  const list=(champ?[you,...others]:[others[0],...others.slice(1,rank),you,...others.slice(rank)]).slice(0,16);
+  return {headline:champ?(leg?"Greatest of All Time":user.div+" Champion"):"No. "+rank+" "+(leg?"legend":user.div),tone:champ?"gold":rank<=5?"mid":"bad",eyebrow:wins+"-"+losses+" in the gauntlet",
+    sub:champ?(leg?`Beat ${O.name} in the GOAT fight.`:`Took the belt from ${O.name}.`):title?`Fell short against ${O.name} in the ${leg?"GOAT":"title"} fight.`:"Two losses kept you out of a title shot.",
     stats:[[wins+"-"+losses,"Record"],[path.filter(p=>p.r==="W"&&!/decision/.test(p.s)).length,"Finishes"],[user.ovr,"OVR"]],
     log,path,score:champ?20:16-rank,
-    table:{head:["Rank","Fighter","OVR"],rows:list.map((t,i)=>({you:t.you,zone:i===0?1:0,c:[i===0?"C":i,t.name,t.you?user.ovr:FIGHTERS.find(x=>x.name===t.name).ovr]})),legend:"Pound-for-pound rankings after your run. C = champion."}};
+    table:{head:["Rank","Fighter","OVR"],rows:list.map((t,i)=>({you:t.you,zone:i===0?1:0,c:[i===0?"C":i,t.name,t.ovr]})),legend:(leg?"Legends ranked by overall after your run.":user.div+" rankings after your run.")+" C = champion."}};
 }
 
 /* ---------- modes ---------- */
@@ -562,7 +550,7 @@ const MODES={
   nba:{label:"NBA",tag:"NBA",kind:"team",teams:NBA,slots:NBA_SLOTS,season:simNBA,desc:"7 picks · 82 games · Play-In & playoffs",verb:"Simulate season"},
   epl:{label:"Premier League",tag:"EPL",kind:"soccer",teams:EPL,season:simEPL,desc:"Spin a formation · 11 picks · 38 matches",verb:"Simulate season"},
   ucl:{label:"Champions League",tag:"UCL",kind:"soccer",teams:UCL,season:simUCL,desc:"Spin a formation · all 36 clubs · league phase & knockouts",verb:"Simulate campaign"},
-  ufc:{label:"UFC",tag:"UFC",kind:"ufc",season:simUFC,desc:"Spin fighters · steal one attribute each · fight for the belt",verb:"Start the gauntlet"}
+  ufc:{label:"UFC",tag:"UFC",kind:"ufc",season:simUFC,desc:"Pick a weight class · spin 140+ fighters & legends · fight for the belt",verb:"Start the gauntlet"}
 };
 const leagueOf=m=>m==="ucl"?UCL.map(t=>t.rating):MODES[m].teams.map(t=>t.rating);
 
@@ -571,7 +559,7 @@ let S={screen:"home"};
 const M=()=>MODES[S.mode];
 function startMode(key){
   const m=MODES[key];
-  S={screen:m.kind==="soccer"?"formation":"draft",mode:key,respins:2,spun:null,used:[],formation:null,spinning:false,
+  S={screen:m.kind==="soccer"?"formation":m.kind==="ufc"?"division":"draft",div:null,mode:key,respins:2,spun:null,used:[],formation:null,spinning:false,
      teamName:key==="ufc"?"The Draft Pick":"Your Team",result:null,
      slots:m.kind==="team"?m.slots.map(s=>({...s,player:null})):m.kind==="ufc"?ATTRS.map(([k,label,w])=>({k,label,w,val:null,from:null})):null};
   render();scrollTo(0,0);
@@ -629,7 +617,7 @@ function takeAttr(k){
 function simulate(){
   const name=(document.getElementById("teamName")?.value||"").trim()||S.teamName;S.teamName=name;
   const rating=userRating();
-  const user=S.mode==="ufc"?{name,ovr:rating,a:Object.fromEntries(S.slots.map(s=>[s.k,s.val]))}:{name,rating};
+  const user=S.mode==="ufc"?{name,div:S.div,ovr:rating,a:Object.fromEntries(S.slots.map(s=>[s.k,s.val]))}:{name,rating};
   S.result=M().season(user);
   const key="draftnight.best."+S.mode,best=store.get(key);
   S.newBest=!best||S.result.score>best.score;
@@ -680,6 +668,12 @@ function viewFormation(){
     <div class="sub">${f?"Locked in. Every pick has to fit this shape.":"You draft into whatever shape you land."}</div></div>
   ${f?`<button class="btn" data-act="startDraft">Start the draft</button>${pitch(S.slots)}`:`<button class="btn" data-act="spinF" ${S.spinning?"disabled":""}>${S.spinning?"Spinning…":"Spin formation"}</button>`}`;
 }
+function viewDivision(){
+  return `${topBar("UFC","Step 1")}
+  <div class="sec"><h2>Choose your weight class</h2><div class="list">${Object.entries(DIVS).map(([d,L])=>`<button class="item" data-act="div" data-d="${esc(d)}"><span class="pos">${DIV_TAG[d]}</span>
+    <div style="min-width:0"><div class="nm">${d}</div><div class="note">${d==="Legends"?L.length+" all-time greats · beat the best for GOAT status":"Champion: "+esc(L[0].name)+" · 15 ranked contenders"}</div></div>${ovrBadge(L[0].ovr)}</button>`).join("")}</div></div>
+  <div class="legend">You spin fighters from every division and the legends, stealing one attribute from each. Then you fight up your weight class's rankings for the belt.</div>`;
+}
 function viewDraft(){
   const m=M(),ufc=S.mode==="ufc";
   const filled=S.slots.filter(s=>ufc?s.val!==null:s.player).length,total=S.slots.length;
@@ -702,16 +696,16 @@ function viewDraft(){
   return `${topBar(m.label,`Pick ${Math.min(filled+1,total)}/${total}`)}
   <div class="reel"><div class="lbl">${ufc?"Fighter":"Team"} on the clock</div>
     <div class="txt ${t||S.spinning?"":"idle"} ${S.landed&&t?"land":""}" id="reelTxt">${esc(reelTxt)}</div>
-    <div class="sub">${t?(ufc?esc(t.div):`Team OVR ${Math.round(t.rating)}`):S.formation?S.formation:""}</div></div>
+    <div class="sub">${t?(ufc?esc(t.tag):`Team OVR ${Math.round(t.rating)}`):S.formation?S.formation:""}</div></div>
   <div class="row">${t?`<button class="btn ghost" data-act="respin" ${S.respins>0?"":"disabled"}>Re-spin (${S.respins})</button>`:`<button class="btn" data-act="spin" ${S.spinning?"disabled":""}>${S.spinning?"Spinning…":"Spin"}</button>`}</div>
   ${picks}
-  <div class="sec"><h2>${ufc?"Your fighter":"Your roster"}${S.formation?" · "+S.formation:""}</h2>
+  <div class="sec"><h2>${ufc?"Your fighter · "+esc(S.div):"Your roster"}${S.formation?" · "+S.formation:""}</h2>
   ${ufc?attrBars(S.slots):m.kind==="soccer"?pitch(S.slots):slotList(S.slots)}</div>`;
 }
 function viewReview(){
   const m=M(),r=userRating(),ufc=S.mode==="ufc";
   let proj;
-  if(ufc){const better=FIGHTERS.filter(f=>f.ovr>r).length;proj=`Pound-for-pound on paper: <b>No. ${better+1}</b> of ${FIGHTERS.length+1}`;}
+  if(ufc){const L=DIVS[S.div],better=L.filter(f=>f.ovr>r).length;proj=`On paper: <b>${ord(better+1)}</b> best of ${L.length+1} in the ${S.div==="Legends"?"legends pool":esc(S.div)+" rankings"}`;}
   else{const lg=leagueOf(S.mode).sort((a,b)=>a-b);lg.shift();const better=lg.filter(x=>x>r).length;proj=`On paper: <b>${ord(better+1)}</b> of ${lg.length+1}`;}
   return `${topBar(m.label,"Draft complete")}
   <div class="big"><div class="ovrbig num">${Math.round(r)}<small>OVR</small></div>
@@ -739,7 +733,7 @@ function viewResults(){
   <div class="legend">${r.table.legend}</div></div>`;
 }
 function render(){
-  const v={home:viewHome,formation:viewFormation,draft:viewDraft,review:viewReview,sim:viewSim,results:viewResults}[S.screen]||viewHome;
+  const v={home:viewHome,division:viewDivision,formation:viewFormation,draft:viewDraft,review:viewReview,sim:viewSim,results:viewResults}[S.screen]||viewHome;
   document.getElementById("app").innerHTML=v();
   const rt=document.getElementById("reelTxt");if(rt)fitReel(rt,rt.textContent);
   S.landed=false;
@@ -752,12 +746,13 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="start")startMode(b.dataset.k);
   else if(a==="spinF")spinFormation();
   else if(a==="startDraft"){S.screen="draft";render();}
+  else if(a==="div"&&DIVS[b.dataset.d]){S.div=b.dataset.d;S.screen="draft";render();scrollTo(0,0);}
   else if(a==="spin")spin(false);
   else if(a==="respin"&&S.respins>0)spin(true);
   else if(a==="pick")draftPlayer(b.dataset.id);
   else if(a==="attr")takeAttr(b.dataset.k);
   else if(a==="sim")simulate();
-  else if(a==="again")startMode(S.mode);
+  else if(a==="again"){const d=S.div;startMode(S.mode);if(d){S.div=d;S.screen="draft";render();}}
 });
 document.getElementById("app").addEventListener("input",e=>{if(e.target.id==="teamName")S.teamName=e.target.value;});
 
