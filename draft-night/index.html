@@ -152,6 +152,16 @@ tr.you td{background:var(--bulb-soft);font-weight:700;color:var(--chalk)}
 tr.you td.n{color:var(--bulb)}
 tbody tr+tr td{border-top:1px solid rgba(37,50,74,.6)}
 .legend{color:var(--muted);font-size:12px}
+.blind{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.blind .t{flex:1;min-width:0}
+.blind .t b{display:block;font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.03em;text-transform:uppercase}
+.blind .t small{color:var(--muted);font-size:13px}
+.sw{flex:0 0 auto;width:52px;height:32px;border-radius:16px;background:var(--panel2);border:1px solid var(--line);position:relative;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.blind[aria-checked="true"] .sw{background:var(--bulb-soft);border-color:var(--bulb)}
+.blind[aria-checked="true"] .sw::after{transform:translateX(20px);background:var(--bulb)}
+.ovr.hid{background:var(--panel2);color:var(--muted);border:1px dashed var(--line)}
+.blindtag{font-family:var(--cond);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--bulb)}
 @media (prefers-reduced-motion:reduce){.reel .txt.land{animation:none}.prog i{transition:none}}
 </style>
 
@@ -560,7 +570,7 @@ let S={screen:"home"};
 const M=()=>MODES[S.mode];
 function startMode(key){
   const m=MODES[key];
-  S={screen:m.kind==="soccer"?"formation":m.kind==="ufc"?"division":"draft",div:null,mode:key,respins:2,spun:null,used:[],formation:null,spinning:false,
+  S={screen:m.kind==="soccer"?"formation":m.kind==="ufc"?"division":"draft",div:null,blind:key==="ufc"&&!!store.get("draftnight.blind"),mode:key,respins:2,spun:null,used:[],formation:null,spinning:false,
      teamName:key==="ufc"?"The Draft Pick":"Your Team",result:null,
      slots:m.kind==="team"?m.slots.map(s=>({...s,player:null})):m.kind==="ufc"?ATTRS.map(([k,label,w])=>({k,label,w,val:null,from:null})):null};
   render();scrollTo(0,0);
@@ -648,9 +658,9 @@ function slotList(slots){
     <div style="min-width:0"><div class="nm">${s.player?esc(s.player.name):"Open"}</div>${s.player?`<div class="note">${esc(s.player.team)} · ${s.player.pos}</div>`:""}</div>
     ${s.player?ovrBadge(s.player.ovr):`<span class="ovr empty">–</span>`}</div>`).join("")}</div>`;
 }
-function attrBars(slots){
+function attrBars(slots,hide){
   return `<div class="bars">${slots.map(s=>`<div class="bar"><div class="k">${s.k}<small>${s.from?esc(s.from):s.label}</small></div>
-    <div class="trk"><div class="fill" style="width:${s.val?(s.val-50)*2:0}%"></div></div><div class="v num">${s.val??"–"}</div></div>`).join("")}</div>`;
+    <div class="trk"><div class="fill" style="width:${s.val&&!hide?(s.val-50)*2:0}%"></div></div><div class="v num">${s.val===null?"–":hide?"?":s.val}</div></div>`).join("")}</div>`;
 }
 
 function viewHome(){
@@ -671,8 +681,9 @@ function viewFormation(){
 }
 function viewDivision(){
   return `${topBar("UFC","Step 1")}
+  <button class="blind" role="switch" aria-checked="${S.blind?"true":"false"}" data-act="blind"><div class="t"><b>Blind draft</b><small>Hide every rating until your fighter is built. Pick on what you know about each fighter.</small></div><span class="sw" aria-hidden="true"></span></button>
   <div class="sec"><h2>Choose your weight class</h2><div class="list">${Object.entries(DIVS).map(([d,L])=>`<button class="item" data-act="div" data-d="${esc(d)}"><span class="pos">${DIV_TAG[d]}</span>
-    <div style="min-width:0"><div class="nm">${d}</div><div class="note">${d==="Open Weight"?"No weight limits · fight the best of all time":d==="Legends"?L.length+" all-time greats · beat the best for GOAT status":"Champion: "+esc(L[0].name)+" · 15 ranked contenders"}</div></div>${ovrBadge(L[0].ovr)}</button>`).join("")}</div></div>
+    <div style="min-width:0"><div class="nm">${d}</div><div class="note">${d==="Open Weight"?"No weight limits · fight the best of all time":d==="Legends"?L.length+" all-time greats · beat the best for GOAT status":"Champion: "+esc(L[0].name)+" · 15 ranked contenders"}</div></div>${S.blind?`<span class="ovr hid">?</span>`:ovrBadge(L[0].ovr)}</button>`).join("")}</div></div>
   <div class="legend">You spin fighters from every division and the legends, stealing one attribute from each. Then you fight up your weight class's rankings for the belt.</div>`;
 }
 function viewDraft(){
@@ -689,24 +700,24 @@ function viewDraft(){
         <div class="note">${taken?"Already on your team":ok?`Fills <b>${slot.k}</b>`:"No open slot"}</div></div>${ovrBadge(p.ovr)}</button>`;}).join("")}</div></div>`;
   }
   if(t&&ufc){
-    picks=`<div class="sec"><h2>Take one attribute from ${esc(t.name)} <span style="color:var(--chalk)">· ${t.ovr} OVR</span></h2><div class="attrs">${S.slots.map(s=>{
+    picks=`<div class="sec"><h2>Take one attribute from ${esc(t.name)}${S.blind?"":` <span style="color:var(--chalk)">· ${t.ovr} OVR</span>`}</h2><div class="attrs">${S.slots.map(s=>{
       const v=t.a[s.k],ok=s.val===null;
-      return `<button class="attr ${ok?"":"off"}" ${ok?`data-act="attr" data-k="${s.k}"`:"disabled"}><span class="k">${s.k}<small>${ok?s.label:"Filled · "+s.val}</small></span>${ovrBadge(v)}</button>`;}).join("")}</div></div>`;
+      return `<button class="attr ${ok?"":"off"}" ${ok?`data-act="attr" data-k="${s.k}"`:"disabled"}><span class="k">${s.k}<small>${ok?s.label:S.blind?"Filled":"Filled · "+s.val}</small></span>${S.blind?`<span class="ovr hid">?</span>`:ovrBadge(v)}</button>`;}).join("")}</div></div>`;
   }
   const reelTxt=t?t.name:S.spinning?"…":(ufc?"Who's next?":"Spin a team");
   return `${topBar(m.label,`Pick ${Math.min(filled+1,total)}/${total}`)}
-  <div class="reel"><div class="lbl">${ufc?"Fighter":"Team"} on the clock</div>
+  <div class="reel"><div class="lbl">${ufc?"Fighter":"Team"} on the clock${ufc&&S.blind?` · <span class="blindtag">Blind draft</span>`:""}</div>
     <div class="txt ${t||S.spinning?"":"idle"} ${S.landed&&t?"land":""}" id="reelTxt">${esc(reelTxt)}</div>
     <div class="sub">${t?(ufc?esc(t.tag):`Team OVR ${Math.round(t.rating)}`):S.formation?S.formation:""}</div></div>
   <div class="row">${t?`<button class="btn ghost" data-act="respin" ${S.respins>0?"":"disabled"}>Re-spin (${S.respins})</button>`:`<button class="btn" data-act="spin" ${S.spinning?"disabled":""}>${S.spinning?"Spinning…":"Spin"}</button>`}</div>
   ${picks}
   <div class="sec"><h2>${ufc?"Your fighter · "+esc(S.div):"Your roster"}${S.formation?" · "+S.formation:""}</h2>
-  ${ufc?attrBars(S.slots):m.kind==="soccer"?pitch(S.slots):slotList(S.slots)}</div>`;
+  ${ufc?attrBars(S.slots,S.blind):m.kind==="soccer"?pitch(S.slots):slotList(S.slots)}</div>`;
 }
 function viewReview(){
   const m=M(),r=userRating(),ufc=S.mode==="ufc";
   let proj;
-  if(ufc){const L=DIVS[S.div],better=L.filter(f=>f.ovr>r).length;proj=`On paper: <b>${ord(better+1)}</b> best of ${L.length+1} in the ${S.div==="Open Weight"?"all-time rankings":S.div==="Legends"?"legends pool":esc(S.div)+" rankings"}`;}
+  if(ufc){const L=DIVS[S.div],better=L.filter(f=>f.ovr>r).length;proj=`${S.blind?"Blind draft revealed. ":""}On paper: <b>${ord(better+1)}</b> best of ${L.length+1} in the ${S.div==="Open Weight"?"all-time rankings":S.div==="Legends"?"legends pool":esc(S.div)+" rankings"}`;}
   else{const lg=leagueOf(S.mode).sort((a,b)=>a-b);lg.shift();const better=lg.filter(x=>x>r).length;proj=`On paper: <b>${ord(better+1)}</b> of ${lg.length+1}`;}
   return `${topBar(m.label,"Draft complete")}
   <div class="big"><div class="ovrbig num">${Math.round(r)}<small>OVR</small></div>
@@ -747,13 +758,14 @@ document.getElementById("app").addEventListener("click",e=>{
   else if(a==="start")startMode(b.dataset.k);
   else if(a==="spinF")spinFormation();
   else if(a==="startDraft"){S.screen="draft";render();}
+  else if(a==="blind"){S.blind=!S.blind;store.set("draftnight.blind",S.blind);render();}
   else if(a==="div"&&DIVS[b.dataset.d]){S.div=b.dataset.d;S.screen="draft";render();scrollTo(0,0);}
   else if(a==="spin")spin(false);
   else if(a==="respin"&&S.respins>0)spin(true);
   else if(a==="pick")draftPlayer(b.dataset.id);
   else if(a==="attr")takeAttr(b.dataset.k);
   else if(a==="sim")simulate();
-  else if(a==="again"){const d=S.div;startMode(S.mode);if(d){S.div=d;S.screen="draft";render();}}
+  else if(a==="again")startMode(S.mode);
 });
 document.getElementById("app").addEventListener("input",e=>{if(e.target.id==="teamName")S.teamName=e.target.value;});
 
