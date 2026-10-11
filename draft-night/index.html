@@ -306,7 +306,7 @@ const UFC_DIVS=[
 ["Bantamweight","Petr Yan|93,84,82,80,92,92,85,91;Merab Dvalishvili|82,70,97,85,99,92,90,90;Sean O'Malley|92,88,65,72,82,80,93,86;Song Yadong|88,86,76,74,84,88,86,84;Umar Nurmagomedov|88,78,94,88,92,88,88,90;Mario Bautista|82,78,82,88,90,84,82,84;Cory Sandhagen|90,84,76,78,86,82,90,88;Payton Talbott|88,84,70,74,84,80,88,80;Aiemann Zahabi|86,80,76,78,84,82,82,82;David Martinez|84,84,74,74,82,82,84,78;Raul Rosas Jr.|76,76,86,88,82,78,82,78;Marlon Vera|86,82,68,76,84,90,80,82;Deiveson Figueiredo|84,86,74,84,78,80,82,80;Farid Basharat|80,76,86,88,84,80,80,82;Marcus McGhee|84,86,72,72,80,80,82,78;Raoni Barcelos|84,84,76,80,80,78,82,78"],
 ["Flyweight","Joshua Van|90,82,80,80,94,90,92,86;Manel Kape|90,86,70,74,82,80,90,82;Alexandre Pantoja|84,78,86,92,90,88,88,88;Brandon Royval|84,80,70,86,88,78,84,80;Tatsuro Taira|80,74,84,90,86,82,82,84;Asu Almabayev|78,74,88,86,86,80,80,82;Lone'er Kavanagh|86,82,74,74,84,82,86,80;Ramazan Temirov|84,84,76,74,82,80,84,78;Kyoji Horiguchi|88,84,80,78,84,78,90,88;Amir Albazi|82,78,80,86,82,80,82,84;Brandon Moreno|86,78,80,84,86,84,84,86;Sumudaerji|84,84,68,70,80,78,84,76;Mitch Raposo|80,74,78,80,86,80,82,78;Imanol Rodriguez|80,76,78,80,82,78,82,76;Rei Tsuruya|74,72,86,88,82,78,80,78;Charles Johnson|82,76,74,76,86,80,84,78"]
 ];
-const UFC_LEGENDS="Jon Jones|90,84,93,90,90,92,84,98;Georges St-Pierre|90,82,96,90,94,88,88,97;Khabib Nurmagomedov|82,76,99,95,97,90,82,95;Anderson Silva|97,90,70,82,82,84,95,92;Demetrious Johnson|90,74,90,92,97,88,96,98;José Aldo|94,88,84,80,86,90,90,90;Daniel Cormier|84,82,96,85,88,90,78,90;Cain Velasquez|86,86,94,82,98,84,82,86;Conor McGregor|92,94,68,70,70,84,92,85;Francis Ngannou|80,99,72,70,72,92,80,80;Stipe Miocic|86,86,88,78,86,86,78,88;BJ Penn|88,80,80,96,72,92,84,86;Dominick Cruz|88,74,86,78,92,82,96,92;Henry Cejudo|82,78,94,80,88,82,86,86;Dustin Poirier|90,88,76,84,88,88,80,90;Chuck Liddell|88,96,82,66,80,88,78,80;Randy Couture|80,80,94,82,88,84,72,92;Matt Hughes|74,82,96,86,88,84,74,84;Royce Gracie|62,60,74,99,84,82,66,90";
+const UFC_LEGENDS="Jon Jones|92,84,95,90,90,94,84,98;Georges St-Pierre|90,82,96,90,94,88,88,97;Khabib Nurmagomedov|82,76,99,95,97,90,82,95;Anderson Silva|97,90,70,82,82,84,95,92;Demetrious Johnson|90,74,90,92,97,88,96,98;José Aldo|94,88,84,80,86,90,90,90;Daniel Cormier|84,82,96,85,88,90,78,90;Cain Velasquez|86,86,94,82,98,84,82,86;Conor McGregor|92,94,68,70,70,84,92,85;Francis Ngannou|80,99,72,70,72,92,80,80;Stipe Miocic|86,86,88,78,86,86,78,88;BJ Penn|88,80,80,96,72,92,84,86;Dominick Cruz|88,74,86,78,92,82,96,92;Henry Cejudo|82,78,94,80,88,82,86,86;Dustin Poirier|90,88,76,84,88,88,80,90;Chuck Liddell|88,96,82,66,80,88,78,80;Randy Couture|80,80,94,82,88,84,72,92;Matt Hughes|74,82,96,86,88,84,74,84;Royce Gracie|62,60,74,99,84,82,66,90";
 
 /* ---------- build ---------- */
 const buildTeams=raw=>raw.map(([id,name,conf,s])=>({id,name,conf,players:s.split(";").map((x,i)=>{const [n,pos,o]=x.split("|");return {id:id+"_"+i,name:n,pos,ovr:+o,team:name};})}));
@@ -318,7 +318,8 @@ const DIVS={};
 UFC_DIVS.forEach(([div,str])=>{DIVS[div]=parseF(str).map(f=>({...f,div,tag:f.rank?div+" · No. "+f.rank:div+" champion"}));});
 DIVS.Legends=parseF(UFC_LEGENDS).sort((a,b)=>b.ovr-a.ovr).map((f,i)=>({...f,rank:i,div:"Legends",tag:"UFC legend"}));
 const FIGHTERS=Object.values(DIVS).flat();FIGHTERS.forEach((f,i)=>f.id="f"+i);
-const DIV_TAG={Heavyweight:"HW","Light Heavyweight":"LHW",Middleweight:"MW",Welterweight:"WW",Lightweight:"LW",Featherweight:"FW",Bantamweight:"BW",Flyweight:"FLW",Legends:"GOAT"};
+DIVS["Open Weight"]=[...FIGHTERS].sort((a,b)=>b.ovr-a.ovr);
+const DIV_TAG={Heavyweight:"HW","Light Heavyweight":"LHW",Middleweight:"MW",Welterweight:"WW",Lightweight:"LW",Featherweight:"FW",Bantamweight:"BW",Flyweight:"FLW",Legends:"GOAT","Open Weight":"OPEN"};
 
 const mk=(k,acc,w,x,y)=>({k,acc,w:w??1,x,y});
 const NFL_SLOTS=[mk("QB",["QB"],.22),mk("RB",["RB"],.08),mk("WR",["WR"],.10),mk("WR",["WR"],.10),mk("TE",["TE"],.07),mk("OL",["OL"],.12),mk("DL",["DL"],.11),mk("LB",["LB"],.07),mk("CB",["CB"],.07),mk("S",["S"],.06)];
@@ -527,7 +528,7 @@ function fight(U,O,rounds){
   return {won,how};
 }
 function simUFC(user){
-  const L=DIVS[user.div],leg=user.div==="Legends",lbl=r=>leg?"No. "+r+" legend":"No. "+r+" "+user.div;
+  const L=DIVS[user.div],open=user.div==="Open Weight",leg=open||user.div==="Legends",word=open?"all-time":"legend",lbl=r=>leg?"No. "+r+" "+word:"No. "+r+" "+user.div;
   let rank=15,wins=0,losses=0,champ=false;const path=[],log=[];
   [12,9,7,5,3].forEach(r=>{const O=L[r],f=fight(user,O,3);
     if(f.won){wins++;rank=Math.min(rank,r);}else{losses++;rank=Math.min(15,rank+2);}
@@ -537,11 +538,11 @@ function simUFC(user){
   log.push({r:f.won?"W":"L"});path.push({round:title?(leg?"GOAT fight":"Title fight")+" · 5 rounds":lbl(4),opp:O.name,s:f.how,r:f.won?"W":"L"});
   const others=L.slice(0,16),you={name:user.name,you:true,ovr:user.ovr};
   const list=(champ?[you,...others]:[others[0],...others.slice(1,rank),you,...others.slice(rank)]).slice(0,16);
-  return {headline:champ?(leg?"Greatest of All Time":user.div+" Champion"):"No. "+rank+" "+(leg?"legend":user.div),tone:champ?"gold":rank<=5?"mid":"bad",eyebrow:wins+"-"+losses+" in the gauntlet",
+  return {headline:champ?(leg?"Greatest of All Time":user.div+" Champion"):"No. "+rank+" "+(leg?word:user.div),tone:champ?"gold":rank<=5?"mid":"bad",eyebrow:wins+"-"+losses+" in the gauntlet",
     sub:champ?(leg?`Beat ${O.name} in the GOAT fight.`:`Took the belt from ${O.name}.`):title?`Fell short against ${O.name} in the ${leg?"GOAT":"title"} fight.`:"Two losses kept you out of a title shot.",
     stats:[[wins+"-"+losses,"Record"],[path.filter(p=>p.r==="W"&&!/decision/.test(p.s)).length,"Finishes"],[user.ovr,"OVR"]],
     log,path,score:champ?20:16-rank,
-    table:{head:["Rank","Fighter","OVR"],rows:list.map((t,i)=>({you:t.you,zone:i===0?1:0,c:[i===0?"C":i,t.name,t.ovr]})),legend:(leg?"Legends ranked by overall after your run.":user.div+" rankings after your run.")+" C = champion."}};
+    table:{head:["Rank","Fighter","OVR"],rows:list.map((t,i)=>({you:t.you,zone:i===0?1:0,c:[i===0?"C":i,t.name,t.ovr]})),legend:(open?"All-time rankings across every weight class after your run.":leg?"Legends ranked by overall after your run.":user.div+" rankings after your run.")+" C = champion."}};
 }
 
 /* ---------- modes ---------- */
@@ -671,7 +672,7 @@ function viewFormation(){
 function viewDivision(){
   return `${topBar("UFC","Step 1")}
   <div class="sec"><h2>Choose your weight class</h2><div class="list">${Object.entries(DIVS).map(([d,L])=>`<button class="item" data-act="div" data-d="${esc(d)}"><span class="pos">${DIV_TAG[d]}</span>
-    <div style="min-width:0"><div class="nm">${d}</div><div class="note">${d==="Legends"?L.length+" all-time greats · beat the best for GOAT status":"Champion: "+esc(L[0].name)+" · 15 ranked contenders"}</div></div>${ovrBadge(L[0].ovr)}</button>`).join("")}</div></div>
+    <div style="min-width:0"><div class="nm">${d}</div><div class="note">${d==="Open Weight"?"No weight limits · fight the best of all time":d==="Legends"?L.length+" all-time greats · beat the best for GOAT status":"Champion: "+esc(L[0].name)+" · 15 ranked contenders"}</div></div>${ovrBadge(L[0].ovr)}</button>`).join("")}</div></div>
   <div class="legend">You spin fighters from every division and the legends, stealing one attribute from each. Then you fight up your weight class's rankings for the belt.</div>`;
 }
 function viewDraft(){
@@ -705,7 +706,7 @@ function viewDraft(){
 function viewReview(){
   const m=M(),r=userRating(),ufc=S.mode==="ufc";
   let proj;
-  if(ufc){const L=DIVS[S.div],better=L.filter(f=>f.ovr>r).length;proj=`On paper: <b>${ord(better+1)}</b> best of ${L.length+1} in the ${S.div==="Legends"?"legends pool":esc(S.div)+" rankings"}`;}
+  if(ufc){const L=DIVS[S.div],better=L.filter(f=>f.ovr>r).length;proj=`On paper: <b>${ord(better+1)}</b> best of ${L.length+1} in the ${S.div==="Open Weight"?"all-time rankings":S.div==="Legends"?"legends pool":esc(S.div)+" rankings"}`;}
   else{const lg=leagueOf(S.mode).sort((a,b)=>a-b);lg.shift();const better=lg.filter(x=>x>r).length;proj=`On paper: <b>${ord(better+1)}</b> of ${lg.length+1}`;}
   return `${topBar(m.label,"Draft complete")}
   <div class="big"><div class="ovrbig num">${Math.round(r)}<small>OVR</small></div>
