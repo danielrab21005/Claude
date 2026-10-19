@@ -82,6 +82,9 @@ git pull origin <branch-name>
 | Search content | `Grep` tool (not `grep`/`rg`) |
 | System commands | `Bash` tool |
 
+### Text Cleaning
+- Apply the `clean-user-facing-text` skill (`.claude/skills/clean-user-facing-text/`) to all user-facing prose written for the user: website copy, product copy, emails, docs, and other text files. Leave code untouched.
+
 ### Tone & Output
 - Be concise — lead with action, not reasoning.
 - Do not use emojis unless explicitly requested.
