@@ -85,7 +85,9 @@ h1 small { display: block; font-family: var(--mono); font-weight: 400; font-size
 .slot.nofit .piece { opacity: .35; filter: grayscale(.7); }
 .piece { display: grid; gap: 2px; }
 .tray .piece { grid-auto-rows: var(--tc); }
-.float { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 20; display: grid; gap: var(--gap); filter: drop-shadow(0 10px 14px rgb(0 0 0 / .25)); }
+.float { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 20; display: grid; gap: var(--gap); filter: drop-shadow(0 10px 14px rgb(0 0 0 / .25)); will-change: transform; }
+.float.back { transition: transform .16s ease-out, opacity .16s ease-out; opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .float.back { transition: none; } }
 .pc { border-radius: 3px; }
 .gap { visibility: hidden; }
 
@@ -377,7 +379,19 @@ function place(i, r, c) {
   renderAll();
 }
 
-let drag = null;
+let drag = null, raf = 0, lastPt = null;
+function origin() { const o = cellEls[0].getBoundingClientRect(); return { x: o.left, y: o.top }; }
+function bestSpot(sh, fr, fc) {
+  // Exact snap first, then the closest legal spot within one cell, so near-misses still land.
+  let best = null, bd = Infinity;
+  for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+    const r = Math.round(fr) + dr, c = Math.round(fc) + dc;
+    if (!fits(sh, r, c)) continue;
+    const d = (r - fr) ** 2 + (c - fc) ** 2;
+    if (d < bd && d < 0.9) { bd = d; best = [r, c]; }
+  }
+  return best;
+}
 trayEl.addEventListener("pointerdown", e => {
   const slot = e.target.closest(".slot");
   if (!slot || S.over) return;
@@ -392,26 +406,49 @@ trayEl.addEventListener("pointerdown", e => {
   fl.style.gridAutoRows = a.height + "px";
   document.body.appendChild(fl);
   slot.classList.add("lifted");
-  drag = { i, p, sh, fl, slot, cell: a.width, step: b.left - a.left, touch: e.pointerType !== "mouse", target: null };
-  move(e);
+  const step = b.left - a.left;
+  const w = sh.w * step - (step - a.width), h = sh.h * step - (step - a.width);
+  const sr = slot.getBoundingClientRect();
+  drag = { i, p, sh, fl, slot, step, w, h, home: [sr.left + (sr.width - w) / 2, sr.top + (sr.height - h) / 2],
+    lift: e.pointerType !== "mouse" ? h / 2 + 48 : 0, o: origin(), target: null, key: "" };
+  try { trayEl.setPointerCapture(e.pointerId); } catch (err) {}
+  lastPt = { x: e.clientX, y: e.clientY };
+  frame();
 });
-function move(e) {
-  const { sh, fl, cell, step } = drag;
-  const w = sh.w * step - (step - cell), h = sh.h * step - (step - cell);
-  const lift = drag.touch ? h / 2 + 48 : 0;
-  const left = e.clientX - w / 2, top = e.clientY - h / 2 - lift;
-  fl.style.transform = `translate(${left}px, ${top}px)`;
-  const o = cellEls[0].getBoundingClientRect();
-  const c = Math.round((left - o.left) / step), r = Math.round((top - o.top) / step);
-  drag.target = fits(sh, r, c) ? [r, c] : null;
-  renderBoard(drag.target ? { sh, color: drag.p.color, r, c } : null);
+function frame() {
+  raf = 0;
+  if (!drag || !lastPt) return;
+  const { sh, fl, step, w, h, o } = drag;
+  const left = lastPt.x - w / 2, top = lastPt.y - h / 2 - drag.lift;
+  fl.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+  drag.pos = [left, top];
+  drag.target = bestSpot(sh, (top - o.y) / step, (left - o.x) / step);
+  const key = drag.target ? drag.target.join() : "";
+  if (key !== drag.key) {
+    drag.key = key;
+    renderBoard(drag.target ? { sh, color: drag.p.color, r: drag.target[0], c: drag.target[1] } : null);
+  }
 }
-window.addEventListener("pointermove", e => { if (drag) move(e); });
-function end() {
+window.addEventListener("pointermove", e => {
   if (!drag) return;
-  const d = drag; drag = null;
-  d.fl.remove(); d.slot.classList.remove("lifted");
-  if (d.target) place(d.i, d.target[0], d.target[1]); else renderBoard();
+  lastPt = { x: e.clientX, y: e.clientY };
+  if (!raf) raf = requestAnimationFrame(frame);
+}, { passive: true });
+window.addEventListener("scroll", () => { if (drag) { drag.o = origin(); drag.key = null; } }, { passive: true });
+function end(e) {
+  if (!drag) return;
+  if (e && e.type === "pointerup") { lastPt = { x: e.clientX, y: e.clientY }; frame(); }
+  if (raf) { cancelAnimationFrame(raf); raf = 0; }
+  const d = drag; drag = null; lastPt = null;
+  if (d.target) {
+    d.fl.remove(); d.slot.classList.remove("lifted");
+    place(d.i, d.target[0], d.target[1]);
+  } else {
+    renderBoard();
+    d.fl.classList.add("back");
+    d.fl.style.transform = `translate3d(${d.home[0]}px, ${d.home[1]}px, 0) scale(.6)`;
+    setTimeout(() => { d.fl.remove(); d.slot.classList.remove("lifted"); }, 170);
+  }
 }
 window.addEventListener("pointerup", end);
 window.addEventListener("pointercancel", end);
