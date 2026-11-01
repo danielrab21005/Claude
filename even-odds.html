@@ -1,0 +1,430 @@
+<title>Even Odds</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: drafting-table split. The board on the left, the open audit of every draw on the right; stacks on phones. */
+:root {
+  --bg: #e6edf3; --paper: #f5f8fb; --cell: #dbe4ed; --line: #c3d1de;
+  --ink: #17283a; --muted: #56697d; --accent: #d2452f;
+  --b0: #2f6fd6; --b1: #e0563b; --b2: #eea233; --b3: #23998b; --b4: #8a5cd1; --b5: #3aa9d4; --b6: #d24f87;
+  --display: "Big Shoulders Display", Impact, "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --gap: 3px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d1827; --paper: #12223a; --cell: #182d48; --line: #24405f;
+  --ink: #e2ebf4; --muted: #8ea3ba; --accent: #ff7b5e; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0d1827; --paper: #12223a; --cell: #182d48; --line: #24405f;
+  --ink: #e2ebf4; --muted: #8ea3ba; --accent: #ff7b5e; color-scheme: dark;
+}
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 28px 28px; background-attachment: fixed;
+}
+.wrap {
+  max-width: 1000px; margin: 0 auto;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 28px; align-items: start;
+}
+@media (max-width: 820px) { .wrap { grid-template-columns: minmax(0, 1fr); justify-items: center; } .audit { width: 100%; max-width: 460px; } }
+
+.game { width: 100%; max-width: 460px; display: grid; gap: 14px; }
+header { display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+h1 { font-family: var(--display); font-weight: 900; font-size: 44px; line-height: .9; margin: 0; letter-spacing: .01em; text-transform: uppercase; }
+h1 small { display: block; font-family: var(--mono); font-weight: 400; font-size: 11px; letter-spacing: .12em; color: var(--muted); margin-top: 6px; }
+.scores { display: flex; gap: 18px; text-align: right; }
+.score .k { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.score .v { font-family: var(--display); font-weight: 700; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.score.main .v { color: var(--accent); }
+
+.board-wrap { position: relative; }
+.board {
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: var(--gap); padding: 7px;
+  background: var(--paper); border: 2px solid var(--ink); border-radius: 6px;
+  aspect-ratio: 1; width: 100%; max-width: 100%; touch-action: none; box-sizing: border-box;
+}
+.cell { background: var(--cell); border-radius: 3px; position: relative; }
+.cell.on, .float .pc, .tray .pc, .glyph .pc {
+  background: var(--c);
+  box-shadow: inset 0 -3px 0 rgb(0 0 0 / .2), inset 0 2px 0 rgb(255 255 255 / .28);
+}
+.cell.ghost { background: var(--c); opacity: .38; }
+.cell.hint { filter: brightness(1.25) saturate(1.2); outline: 2px solid var(--ink); outline-offset: -2px; }
+.cell.clearing { background: var(--c); animation: pop .3s ease-in forwards; }
+@keyframes pop { 40% { transform: scale(1.12); } to { transform: scale(.1); opacity: 0; } }
+
+.toast {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); pointer-events: none;
+  font-family: var(--display); font-weight: 900; font-size: 40px; text-transform: uppercase; color: var(--accent);
+  text-shadow: 0 2px 0 var(--paper), 0 -2px 0 var(--paper), 2px 0 0 var(--paper), -2px 0 0 var(--paper);
+  animation: rise .9s ease-out forwards; white-space: nowrap;
+}
+@keyframes rise { from { opacity: 0; transform: translate(-50%, -30%); } 20% { opacity: 1; } to { opacity: 0; transform: translate(-50%, -110%); } }
+
+.over {
+  position: absolute; inset: 0; display: grid; place-content: center; gap: 10px; text-align: center;
+  background: color-mix(in srgb, var(--paper) 88%, transparent); border-radius: 6px; padding: 20px;
+}
+.over h2 { font-family: var(--display); font-weight: 900; font-size: 38px; text-transform: uppercase; margin: 0; line-height: 1; text-wrap: balance; }
+.over p { margin: 0; color: var(--muted); max-width: 30ch; }
+
+.tray { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; touch-action: none; --tc: clamp(13px, 4.2vw, 21px); }
+.slot {
+  height: calc(var(--tc) * 5 + 30px); display: grid; place-items: center; border: 1.5px dashed var(--line);
+  border-radius: 6px; background: color-mix(in srgb, var(--paper) 70%, transparent); cursor: grab; user-select: none;
+}
+.slot.lifted > * { opacity: .15; }
+.slot.nofit .piece { opacity: .35; filter: grayscale(.7); }
+.piece { display: grid; gap: 2px; }
+.tray .piece { grid-auto-rows: var(--tc); }
+.float { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 20; display: grid; gap: var(--gap); filter: drop-shadow(0 10px 14px rgb(0 0 0 / .25)); }
+.pc { border-radius: 3px; }
+.gap { visibility: hidden; }
+
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+button {
+  font: 600 13px var(--body); letter-spacing: .04em; color: var(--paper); background: var(--ink);
+  border: 0; border-radius: 4px; padding: 9px 16px; cursor: pointer;
+}
+button:hover { background: var(--accent); }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.audit { display: grid; gap: 18px; min-width: 0; }
+.audit section { background: var(--paper); border: 1.5px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.audit h2 { font-family: var(--display); font-weight: 700; font-size: 24px; text-transform: uppercase; letter-spacing: .02em; margin: 0; line-height: 1.05; text-wrap: balance; }
+.audit p { margin: 0; color: var(--muted); max-width: 62ch; }
+.audit p strong { color: var(--ink); font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { border-top: 2px solid var(--ink); padding-top: 6px; }
+.stat .k { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.stat .v { font-family: var(--display); font-weight: 700; font-size: 26px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.hist { display: grid; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 6px; }
+.tile { border: 1px solid var(--line); border-radius: 4px; padding: 6px 4px 4px; display: grid; justify-items: center; gap: 4px; }
+.tile.last { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.glyph { display: grid; gap: 1px; grid-auto-rows: 5px; height: 29px; align-content: center; }
+.glyph .pc { border-radius: 1px; box-shadow: none; }
+.tile .n { font-family: var(--mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+.meter { width: 100%; height: 3px; background: var(--cell); border-radius: 2px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--ink); }
+.log { font-family: var(--mono); font-size: 12px; margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-variant-numeric: tabular-nums; }
+.log li { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px dotted var(--line); padding-block: 2px; }
+.log li span:first-child { color: var(--muted); }
+pre { font-family: var(--mono); font-size: 12px; background: var(--cell); border-radius: 4px; padding: 12px; margin: 0; overflow-x: auto; line-height: 1.55; }
+
+@media (prefers-reduced-motion: reduce) { .cell.clearing, .toast { animation-duration: .01s; } }
+</style>
+
+<div class="wrap">
+  <main class="game">
+    <header>
+      <h1>Even Odds<small>8×8 · NO HOUSE EDGE</small></h1>
+      <div class="scores">
+        <div class="score main"><div class="k">Score</div><div class="v" id="score">0</div></div>
+        <div class="score"><div class="k">Best</div><div class="v" id="best">0</div></div>
+      </div>
+    </header>
+    <div class="board-wrap">
+      <div class="board" id="board" aria-label="Game board, 8 by 8"></div>
+      <div class="over" id="over" hidden>
+        <h2>No room left</h2>
+        <p id="overText"></p>
+        <div><button id="again" type="button">Play again</button></div>
+      </div>
+    </div>
+    <div class="tray" id="tray" aria-label="Your three pieces"></div>
+    <div class="bar">
+      <span id="combo">Drag a piece onto the board. Fill a row or column to clear it.</span>
+      <button id="newGame" type="button">New game</button>
+    </div>
+  </main>
+
+  <aside class="audit">
+    <section>
+      <h2>Every draw, in the open</h2>
+      <p>Each piece is picked from <strong id="nShapes"></strong> shapes with equal odds, using your browser's cryptographic random number generator. The draw function never sees the board, your score, or how long you've played. There's no difficulty curve and no mercy pieces, so sometimes you'll get stuck. That's what true randomness looks like.</p>
+      <div class="stats">
+        <div class="stat"><div class="k">Draws</div><div class="v" id="sDraws">0</div></div>
+        <div class="stat"><div class="k">Odds each</div><div class="v" id="sOdds"></div></div>
+        <div class="stat"><div class="k">Expected</div><div class="v" id="sExp">0</div></div>
+      </div>
+    </section>
+    <section>
+      <h2>Draw count by shape</h2>
+      <p>Counts drift apart early and even out as draws pile up. Play a few games and watch the bars level.</p>
+      <div class="hist" id="hist"></div>
+    </section>
+    <section>
+      <h2>Recent rolls</h2>
+      <ul class="log" id="log"></ul>
+    </section>
+    <section>
+      <h2>The actual code</h2>
+      <p>This is the exact function that picks every piece, printed live from the running game.</p>
+      <pre id="src"></pre>
+    </section>
+  </aside>
+</div>
+
+<script>
+const N = 8;
+const RAW = [
+  ["#"], ["##"], ["#","#"], ["###"], ["#","#","#"], ["####"], ["#","#","#","#"], ["#####"], ["#","#","#","#","#"],
+  ["##","##"], ["###","###"], ["##","##","##"], ["###","###","###"],
+  ["#.","##"], [".#","##"], ["##","#."], ["##",".#"],
+  ["#..","#..","###"], ["..#","..#","###"], ["###","#..","#.."], ["###","..#","..#"],
+  ["###",".#."], [".#.","###"], ["#.","##","#."], [".#","##",".#"],
+  ["##.",".##"], [".##","##."], ["#.","##",".#"], [".#","##","#."],
+  ["#..","###"], ["..#","###"], ["###","#.."], ["###","..#"],
+  ["##","#.","#."], ["##",".#",".#"], ["#.","#.","##"], [".#",".#","##"]
+];
+const SHAPES = RAW.map(rows => {
+  const cells = [];
+  rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === "#") cells.push([y, x]); }));
+  return { rows, cells, h: rows.length, w: Math.max(...rows.map(r => r.length)) };
+});
+const COLORS = 7;
+const col = i => `var(--b${i})`;
+
+function randInt(n) {
+  // Uniform integer in [0, n). Values above the largest multiple
+  // of n are thrown away so no outcome is favoured (no modulo bias).
+  const limit = Math.floor(0x100000000 / n) * n;
+  const buf = new Uint32Array(1);
+  do { crypto.getRandomValues(buf); } while (buf[0] >= limit);
+  return buf[0] % n;
+}
+
+function drawPiece() {
+  // Takes no arguments: it cannot look at the board.
+  const shape = randInt(SHAPES.length);
+  const color = randInt(COLORS);
+  return { shape, color };
+}
+
+let S, best = 0, pending = null;
+try { best = +localStorage.getItem("evenodds-best") || 0; } catch (e) {}
+
+function fresh(keep) {
+  return {
+    board: Array(N * N).fill(null), tray: [null, null, null], score: 0, combo: 0, over: false,
+    counts: keep ? keep.counts : Array(SHAPES.length).fill(0), draws: keep ? keep.draws : 0,
+    log: keep ? keep.log : [], last: keep ? keep.last : null
+  };
+}
+
+function refill() {
+  S.tray = [0, 1, 2].map(() => {
+    const p = drawPiece();
+    S.draws++; S.counts[p.shape]++; S.last = p.shape;
+    S.log.unshift({ n: S.draws, shape: p.shape });
+    return p;
+  });
+  S.log = S.log.slice(0, 12);
+}
+
+const $ = id => document.getElementById(id);
+const boardEl = $("board"), trayEl = $("tray");
+for (let i = 0; i < N * N; i++) { const d = document.createElement("div"); d.className = "cell"; boardEl.appendChild(d); }
+const cellEls = [...boardEl.children];
+
+function fits(sh, r, c, board = S.board) {
+  return sh.cells.every(([y, x]) => {
+    const R = r + y, C = c + x;
+    return R >= 0 && C >= 0 && R < N && C < N && board[R * N + C] === null;
+  });
+}
+function fitsAnywhere(sh) {
+  for (let r = 0; r <= N - sh.h; r++) for (let c = 0; c <= N - sh.w; c++) if (fits(sh, r, c)) return true;
+  return false;
+}
+function fullLines(board) {
+  const rows = [], cols = [];
+  for (let i = 0; i < N; i++) {
+    let rf = true, cf = true;
+    for (let j = 0; j < N; j++) { if (board[i * N + j] === null) rf = false; if (board[j * N + i] === null) cf = false; }
+    if (rf) rows.push(i); if (cf) cols.push(i);
+  }
+  return { rows, cols };
+}
+function lineCells({ rows, cols }) {
+  const set = new Set();
+  rows.forEach(r => { for (let j = 0; j < N; j++) set.add(r * N + j); });
+  cols.forEach(c => { for (let j = 0; j < N; j++) set.add(j * N + c); });
+  return set;
+}
+
+function renderBoard(ghost) {
+  let ghostSet = new Set(), hint = new Set();
+  if (ghost) {
+    const sim = S.board.slice();
+    ghost.sh.cells.forEach(([y, x]) => { const k = (ghost.r + y) * N + ghost.c + x; ghostSet.add(k); sim[k] = ghost.color; });
+    hint = lineCells(fullLines(sim));
+  }
+  cellEls.forEach((el, k) => {
+    const v = S.board[k];
+    let cls = "cell", c = null;
+    if (pending && pending.has(k)) { cls += " clearing"; c = pending.get(k); }
+    else if (v !== null) { cls += " on"; c = v; if (hint.has(k)) cls += " hint"; }
+    else if (ghostSet.has(k)) { cls += hint.has(k) ? " on hint" : " ghost"; c = ghost.color; }
+    el.className = cls;
+    el.style.setProperty("--c", c === null ? "" : col(c));
+  });
+}
+
+function pieceEl(sh, color, extra) {
+  const g = document.createElement("div");
+  g.className = "piece " + (extra || "");
+  g.style.gridTemplateColumns = `repeat(${sh.w}, var(--pcw))`;
+  for (let y = 0; y < sh.h; y++) for (let x = 0; x < sh.w; x++) {
+    const d = document.createElement("div");
+    d.className = sh.rows[y][x] === "#" ? "pc" : "gap";
+    g.appendChild(d);
+  }
+  g.style.setProperty("--c", col(color));
+  return g;
+}
+
+function renderTray() {
+  trayEl.innerHTML = "";
+  S.tray.forEach((p, i) => {
+    const s = document.createElement("div");
+    s.className = "slot"; s.dataset.i = i;
+    if (p) {
+      const sh = SHAPES[p.shape];
+      const el = pieceEl(sh, p.color); el.style.setProperty("--pcw", "var(--tc)");
+      s.appendChild(el);
+      s.setAttribute("aria-label", `Piece of ${sh.cells.length} blocks`);
+      if (!fitsAnywhere(sh)) s.classList.add("nofit");
+    }
+    trayEl.appendChild(s);
+  });
+}
+
+function renderScores() {
+  $("score").textContent = S.score;
+  $("best").textContent = best;
+  $("combo").textContent = S.combo > 1 ? `Combo ×${S.combo}. Clear again on your next move to keep it.`
+    : "Drag a piece onto the board. Fill a row or column to clear it.";
+}
+
+const histEl = $("hist");
+const tiles = SHAPES.map((sh, i) => {
+  const t = document.createElement("div"); t.className = "tile";
+  const g = pieceEl(sh, i % COLORS, "glyph"); g.style.setProperty("--pcw", "5px");
+  const n = document.createElement("div"); n.className = "n";
+  const m = document.createElement("div"); m.className = "meter"; m.appendChild(document.createElement("i"));
+  t.append(g, n, m); histEl.appendChild(t);
+  return t;
+});
+$("nShapes").textContent = SHAPES.length;
+$("sOdds").textContent = "1/" + SHAPES.length;
+$("src").textContent = randInt.toString() + "\n\n" + drawPiece.toString();
+
+function renderAudit() {
+  const max = Math.max(1, ...S.counts);
+  tiles.forEach((t, i) => {
+    t.children[1].textContent = S.counts[i];
+    t.children[2].firstChild.style.width = (S.counts[i] / max * 100) + "%";
+    t.classList.toggle("last", S.log.slice(0, 3).some(l => l.shape === i));
+  });
+  $("sDraws").textContent = S.draws;
+  $("sExp").textContent = (S.draws / SHAPES.length).toFixed(1);
+  $("log").innerHTML = S.log.map(l =>
+    `<li><span>draw #${l.n}</span><span>rolled ${String(l.shape).padStart(2, "0")} of 00–${SHAPES.length - 1} · ${SHAPES[l.shape].cells.length} blocks</span></li>`
+  ).join("");
+}
+
+function renderAll() { renderBoard(); renderTray(); renderScores(); renderAudit(); checkOver(); }
+
+function toast(text) {
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = text;
+  boardEl.parentNode.appendChild(t); setTimeout(() => t.remove(), 900);
+}
+
+function checkOver() {
+  const left = S.tray.filter(Boolean);
+  S.over = left.length > 0 && !left.some(p => fitsAnywhere(SHAPES[p.shape]));
+  $("over").hidden = !S.over;
+  if (S.over) $("overText").textContent = `Final score ${S.score}. None of your pieces fit. The draw didn't plan that; it just happened.`;
+}
+
+function place(i, r, c) {
+  const p = S.tray[i], sh = SHAPES[p.shape];
+  sh.cells.forEach(([y, x]) => { S.board[(r + y) * N + c + x] = p.color; });
+  S.tray[i] = null;
+  let pts = sh.cells.length;
+  const lines = fullLines(S.board), cleared = lineCells(lines), n = lines.rows.length + lines.cols.length;
+  if (n) {
+    S.combo++;
+    const bonus = 10 * n * n * S.combo;
+    pts += bonus;
+    pending = new Map();
+    cleared.forEach(k => { pending.set(k, S.board[k]); S.board[k] = null; });
+    toast(S.combo > 1 ? `Combo ×${S.combo} +${pts}` : n > 1 ? `${n} lines +${pts}` : `+${pts}`);
+    setTimeout(() => { pending = null; renderBoard(); }, 320);
+  } else S.combo = 0;
+  S.score += pts;
+  if (S.score > best) { best = S.score; try { localStorage.setItem("evenodds-best", best); } catch (e) {} }
+  if (S.tray.every(t => !t)) refill();
+  renderAll();
+}
+
+let drag = null;
+trayEl.addEventListener("pointerdown", e => {
+  const slot = e.target.closest(".slot");
+  if (!slot || S.over) return;
+  const i = +slot.dataset.i, p = S.tray[i];
+  if (!p) return;
+  e.preventDefault();
+  const a = cellEls[0].getBoundingClientRect(), b = cellEls[1].getBoundingClientRect();
+  const sh = SHAPES[p.shape];
+  const fl = pieceEl(sh, p.color, "float");
+  fl.classList.remove("piece");
+  fl.style.setProperty("--pcw", a.width + "px");
+  fl.style.gridAutoRows = a.height + "px";
+  document.body.appendChild(fl);
+  slot.classList.add("lifted");
+  drag = { i, p, sh, fl, slot, cell: a.width, step: b.left - a.left, touch: e.pointerType !== "mouse", target: null };
+  move(e);
+});
+function move(e) {
+  const { sh, fl, cell, step } = drag;
+  const w = sh.w * step - (step - cell), h = sh.h * step - (step - cell);
+  const lift = drag.touch ? h / 2 + 48 : 0;
+  const left = e.clientX - w / 2, top = e.clientY - h / 2 - lift;
+  fl.style.transform = `translate(${left}px, ${top}px)`;
+  const o = cellEls[0].getBoundingClientRect();
+  const c = Math.round((left - o.left) / step), r = Math.round((top - o.top) / step);
+  drag.target = fits(sh, r, c) ? [r, c] : null;
+  renderBoard(drag.target ? { sh, color: drag.p.color, r, c } : null);
+}
+window.addEventListener("pointermove", e => { if (drag) move(e); });
+function end() {
+  if (!drag) return;
+  const d = drag; drag = null;
+  d.fl.remove(); d.slot.classList.remove("lifted");
+  if (d.target) place(d.i, d.target[0], d.target[1]); else renderBoard();
+}
+window.addEventListener("pointerup", end);
+window.addEventListener("pointercancel", end);
+
+function newGame() { S = fresh(S); refill(); renderAll(); }
+$("newGame").addEventListener("click", newGame);
+$("again").addEventListener("click", newGame);
+
+function start(data) {
+  S = data && data.S ? data.S : fresh();
+  if (!S.tray.some(Boolean) && !S.over) refill();
+  renderAll();
+}
+window.claude?.hot?.snapshot?.(() => ({ S }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
